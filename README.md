@@ -5,7 +5,7 @@ RethinkDB Adapter is the [Rethink DB](https://www.rethinkdb.com/) adapter for [C
 
 ## Installation
 
-    go get github.com/casbin/rethinkdb-adapter
+    go get github.com/adityapandey9/rethinkdb-adapter
 
 ## Simple Example
 
@@ -13,8 +13,8 @@ RethinkDB Adapter is the [Rethink DB](https://www.rethinkdb.com/) adapter for [C
 package main
 
 import (
-    "os"
-    r "gopkg.in/gorethink/gorethink.v3"
+    	"os"
+    	r "gopkg.in/gorethink/gorethink.v3"
 	"github.com/casbin/casbin"
 	"github.com/casbin/rethinkdbdb-adapter"
 )
@@ -37,7 +37,7 @@ func main() {
 	// Initialize a RethinkDB get session, add it to adapter and use it in a Casbin enforcer:
 	// The adapter will use the database named "casbin".
 	// If it doesn't exist, the adapter will create it automatically.
-  session := getConnect()
+  	session := getConnect()
 	a := rethinkadapter.NewAdapter(session) // Your RethinkDB Session. 
 	
 	e := casbin.NewEnforcer("examples/casbinmodel.conf", a)
