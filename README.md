@@ -16,7 +16,7 @@ import (
     	"os"
     	r "gopkg.in/gorethink/gorethink.v3"
 	"github.com/casbin/casbin"
-	"github.com/casbin/rethinkdbdb-adapter"
+	"github.com/adityapandey9/rethinkdb-adapter"
 )
 
 func getConnect() r.QueryExecutor {
