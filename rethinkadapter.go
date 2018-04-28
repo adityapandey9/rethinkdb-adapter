@@ -9,7 +9,7 @@ import (
 	r "gopkg.in/gorethink/gorethink.v3"
 )
 
-// adapter represents the MySQL adapter for policy storage.
+// adapter represents the RethinkDB adapter for policy storage.
 type adapter struct {
 	session r.QueryExecutor
 }
