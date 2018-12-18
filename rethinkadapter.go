@@ -21,6 +21,7 @@ type policy struct {
 	V2    string `gorethink:"v2"`
 	V3    string `gorethink:"v3"`
 	V4    string `gorethink:"v4"`
+	V5    string `gorethink:"v5"`
 }
 
 func finalizer(a *adapter) {
@@ -101,6 +102,10 @@ func loadPolicyLine(line policy, model model.Model) {
 		tokens = append(tokens, line.V4)
 	}
 
+	if line.V5 != "" {
+		tokens = append(tokens, line.V5)
+	}
+
 	model[sec][key].Policy = append(model[sec][key].Policy, tokens)
 }
 
@@ -137,6 +142,8 @@ func (a *adapter) writeTableLine(ptype string, rule []string) policy {
 			items.V3 = rule[i]
 		case 3:
 			items.V4 = rule[i]
+		case 4:
+			items.V5 = rule[i]
 		}
 	}
 	return items
@@ -206,6 +213,10 @@ func (a *adapter) RemoveFilteredPolicy(sec string, ptype string, fieldIndex int,
 	if fieldIndex <= 3 && 3 < fieldIndex+len(fieldValues) {
 		selector.V4 = fieldValues[3-fieldIndex]
 	}
+	if fieldIndex <= 4 && 4 < fieldIndex+len(fieldValues) {
+		selector.V5 = fieldValues[4-fieldIndex]
+	}
+
 
 	_, err := r.DB("casbin").Table("policy").Filter(selector).Delete().Run(a.session)
 	if err != nil {
