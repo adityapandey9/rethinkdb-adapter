@@ -1,4 +1,4 @@
-module rethinkdb-adapter
+module github.com/Connectplayltd/rethinkdb-adapter
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
