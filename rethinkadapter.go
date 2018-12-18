@@ -6,7 +6,7 @@ import (
 
 	"github.com/casbin/casbin/model"
 	"github.com/casbin/casbin/persist"
-	r "gopkg.in/gorethink/gorethink.v3"
+	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 
 // adapter represents the RethinkDB adapter for policy storage.

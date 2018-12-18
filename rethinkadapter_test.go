@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/casbin/casbin"
-	r "gopkg.in/gorethink/gorethink.v4"
+	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 
 func getConnect() r.QueryExecutor {
