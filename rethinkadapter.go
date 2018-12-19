@@ -6,12 +6,14 @@ import (
 
 	"github.com/casbin/casbin/model"
 	"github.com/casbin/casbin/persist"
-	r "gopkg.in/gorethink/gorethink.v3"
+	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 
 // adapter represents the RethinkDB adapter for policy storage.
 type adapter struct {
-	session r.QueryExecutor
+	session  r.QueryExecutor
+	database string
+	table    string
 }
 
 type policy struct {
@@ -21,6 +23,7 @@ type policy struct {
 	V2    string `gorethink:"v2"`
 	V3    string `gorethink:"v3"`
 	V4    string `gorethink:"v4"`
+	V5    string `gorethink:"v5"`
 }
 
 func finalizer(a *adapter) {
@@ -29,11 +32,31 @@ func finalizer(a *adapter) {
 
 // NewAdapter is the constructor for adapter.
 func NewAdapter(Sessionvar r.QueryExecutor) persist.Adapter {
-	a := &adapter{session: Sessionvar}
+	a := &adapter{session: Sessionvar, database: a.database, table: a.table}
 	a.open()
 	// Call the destructor when the object is released.
 	runtime.SetFinalizer(a, finalizer)
 	return a
+}
+
+// GetDatabaseName returns the name of the database that the adapter will use
+func (a *adapter) GetDatabaseName() string {
+	return a.database
+}
+
+// GetTableName returns the name of the table that the adapter will use
+func (a *adapter) GetTableName() string {
+	return a.database
+}
+
+// SetDatabaseName sets the database that the adapter will use
+func (a *adapter) SetDatabaseName(s string) {
+	a.database = s
+}
+
+// SetTableName sets the tablet that the adapter will use
+func (a *adapter) SetTableName(s string) {
+	a.table = s
 }
 
 func (a *adapter) close() {
@@ -41,7 +64,7 @@ func (a *adapter) close() {
 }
 
 func (a *adapter) createDatabase() error {
-	_, err := r.DBList().Contains("casbin").Do(r.DBCreate("casbin").Exec(a.session)).Run(a.session)
+	_, err := r.DBList().Contains(a.database).Do(r.DBCreate(a.database).Exec(a.session)).Run(a.session)
 	if err != nil {
 		return err
 	}
@@ -49,7 +72,7 @@ func (a *adapter) createDatabase() error {
 }
 
 func (a *adapter) createTable() error {
-	_, err := r.DB("casbin").TableList().Contains("policy").Do(r.DB("casbin").TableCreate("policy").Exec(a.session)).Run(a.session)
+	_, err := r.DB(a.database).TableList().Contains(a.table).Do(r.DB(a.database).TableCreate(a.table).Exec(a.session)).Run(a.session)
 	if err != nil {
 		return err
 	}
@@ -68,7 +91,7 @@ func (a *adapter) open() {
 
 //Erase the table data
 func (a *adapter) dropTable() error {
-	_, err := r.DB("casbin").Table("policy").Delete().Run(a.session)
+	_, err := r.DB(a.database).Table(a.table).Delete().Run(a.session)
 	if err != nil {
 		panic(err)
 	}
@@ -101,6 +124,10 @@ func loadPolicyLine(line policy, model model.Model) {
 		tokens = append(tokens, line.V4)
 	}
 
+	if line.V5 != "" {
+		tokens = append(tokens, line.V5)
+	}
+
 	model[sec][key].Policy = append(model[sec][key].Policy, tokens)
 }
 
@@ -108,7 +135,7 @@ func loadPolicyLine(line policy, model model.Model) {
 func (a *adapter) LoadPolicy(model model.Model) error {
 	a.open()
 
-	rows, errn := r.DB("casbin").Table("policy").Run(a.session)
+	rows, errn := r.DB(a.database).Table(a.table).Run(a.session)
 	if errn != nil {
 		fmt.Printf("E: %v\n", errn)
 		return errn
@@ -137,6 +164,8 @@ func (a *adapter) writeTableLine(ptype string, rule []string) policy {
 			items.V3 = rule[i]
 		case 3:
 			items.V4 = rule[i]
+		case 4:
+			items.V5 = rule[i]
 		}
 	}
 	return items
@@ -161,7 +190,7 @@ func (a *adapter) SavePolicy(model model.Model) error {
 			lines = append(lines, line)
 		}
 	}
-	_, err := r.DB("casbin").Table("policy").Insert(lines).Run(a.session)
+	_, err := r.DB(a.database).Table(a.table).Insert(lines).Run(a.session)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return err
@@ -172,7 +201,7 @@ func (a *adapter) SavePolicy(model model.Model) error {
 //AddPolicy for adding a new policy to rethinkdb
 func (a *adapter) AddPolicy(sec string, PTYPE string, policys []string) error {
 	line := a.writeTableLine(PTYPE, policys)
-	_, err := r.DB("casbin").Table("policy").Insert(line).Run(a.session)
+	_, err := r.DB(a.database).Table(a.table).Insert(line).Run(a.session)
 	if err != nil {
 		return err
 	}
@@ -182,7 +211,7 @@ func (a *adapter) AddPolicy(sec string, PTYPE string, policys []string) error {
 //RemovePolicy for removing a policy rule from rethinkdb
 func (a *adapter) RemovePolicy(sec string, PTYPE string, policys []string) error {
 	line := a.writeTableLine(PTYPE, policys)
-	_, err := r.DB("casbin").Table("policy").Filter(line).Delete().Run(a.session)
+	_, err := r.DB(a.database).Table(a.table).Filter(line).Delete().Run(a.session)
 	if err != nil {
 		return err
 	}
@@ -206,8 +235,11 @@ func (a *adapter) RemoveFilteredPolicy(sec string, ptype string, fieldIndex int,
 	if fieldIndex <= 3 && 3 < fieldIndex+len(fieldValues) {
 		selector.V4 = fieldValues[3-fieldIndex]
 	}
+	if fieldIndex <= 4 && 4 < fieldIndex+len(fieldValues) {
+		selector.V5 = fieldValues[4-fieldIndex]
+	}
 
-	_, err := r.DB("casbin").Table("policy").Filter(selector).Delete().Run(a.session)
+	_, err := r.DB(a.database).Table(a.table).Filter(selector).Delete().Run(a.session)
 	if err != nil {
 		panic(err)
 	}
