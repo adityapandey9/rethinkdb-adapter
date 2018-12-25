@@ -39,6 +39,8 @@ func main() {
 	// If it doesn't exist, the adapter will create it automatically.
   	session := getConnect()
 	a := rethinkadapter.NewAdapter(session) // Your RethinkDB Session. 
+	//Or you can do this
+	a := rethinkadapter.NewAdapter(session, "database_name", "table_name") // Your RethinkDB Session.
 	
 	e := casbin.NewEnforcer("examples/casbinmodel.conf", a)
 	
