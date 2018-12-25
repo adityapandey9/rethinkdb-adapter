@@ -39,6 +39,15 @@ func NewAdapter(Sessionvar r.QueryExecutor) persist.Adapter {
 	return a
 }
 
+// NewAdapter is the constructor for adapter.
+func NewAdapter(Sessionvar r.QueryExecutor, string database, string table) persist.Adapter {
+	a := &adapter{session: Sessionvar, database: database, table: table}
+	a.open()
+	// Call the destructor when the object is released.
+	runtime.SetFinalizer(a, finalizer)
+	return a
+}
+
 // GetDatabaseName returns the name of the database that the adapter will use
 func (a *adapter) GetDatabaseName() string {
 	return a.database
