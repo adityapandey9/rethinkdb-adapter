@@ -32,7 +32,7 @@ func finalizer(a *adapter) {
 
 // NewAdapter is the constructor for adapter.
 func NewAdapter(Sessionvar r.QueryExecutor) persist.Adapter {
-	a := &adapter{session: Sessionvar, database: a.database, table: a.table}
+	a := &adapter{session: Sessionvar, database: "casbin", table: "rethinkdbpolicy"}
 	a.open()
 	// Call the destructor when the object is released.
 	runtime.SetFinalizer(a, finalizer)
