@@ -36,7 +36,7 @@ func getConnect() r.QueryExecutor {
 func main() {
 	// Initialize a RethinkDB get session, add it to adapter and use it in a Casbin enforcer:
 	// The adapter will use the database named "casbin".
-	// If it doesn't exist, the adapter will create it automatically.
+	// If it doesn't exist, the adapter will create it automatically. (default names - Database: casbin, Table: rethinkdbpolicy)
   	session := getConnect()
 	a := rethinkadapter.NewAdapter(session) // Your RethinkDB Session. 
 	//Or you can do this
