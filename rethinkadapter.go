@@ -30,7 +30,7 @@ func finalizer(a *adapter) {
 	a.close()
 }
 
-// NewAdapter is the constructor for adapter.
+// NewAdapter is the constructor for adapter with default database and table name
 func NewAdapter(Sessionvar r.QueryExecutor) persist.Adapter {
 	a := &adapter{session: Sessionvar, database: "casbin", table: "rethinkdbpolicy"}
 	a.open()
