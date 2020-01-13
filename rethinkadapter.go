@@ -250,7 +250,7 @@ func (a *adapter) RemoveFilteredPolicy(sec string, ptype string, fieldIndex int,
 
 	_, err := r.DB(a.database).Table(a.table).Filter(selector).Delete().Run(a.session)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	return nil
 }
