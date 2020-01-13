@@ -40,7 +40,7 @@ func NewAdapter(Sessionvar r.QueryExecutor) persist.Adapter {
 }
 
 // NewAdapter is the constructor for adapter.
-func NewAdapter(Sessionvar r.QueryExecutor, string database, string table) persist.Adapter {
+func NewAdapterDB(Sessionvar r.QueryExecutor, string database, string table) persist.Adapter {
 	a := &adapter{session: Sessionvar, database: database, table: table}
 	a.open()
 	// Call the destructor when the object is released.
