@@ -40,7 +40,7 @@ func main() {
   	session := getConnect()
 	a := rethinkadapter.NewAdapter(session) // Your RethinkDB Session. 
 	//Or you can do this
-	a := rethinkadapter.NewAdapter(session, "database_name", "table_name") // Your RethinkDB Session.
+	a := rethinkadapter.NewAdapterDB(session, "database_name", "table_name") // Your RethinkDB Session.
 	
 	e := casbin.NewEnforcer("examples/casbinmodel.conf", a)
 	
